@@ -17,6 +17,7 @@ lazy val root = (project in file("."))
         Seq(
           // akka streams
           "com.typesafe.akka"  %% "akka-stream"              % Versions.akka,
+          "com.typesafe.akka"  %% "akka-stream-kafka"        % Versions.alpakka,
           "com.lightbend.akka" %% "akka-stream-alpakka-xml"  % Versions.alpakka,
           "com.lightbend.akka" %% "akka-stream-alpakka-file" % Versions.alpakka,
           "com.lightbend.akka" %% "akka-stream-alpakka-csv"  % Versions.alpakka,

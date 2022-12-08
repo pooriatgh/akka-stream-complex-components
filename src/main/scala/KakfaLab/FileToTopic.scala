@@ -1,5 +1,0 @@
-package KakfaLab
-
-object FileToTopic {
-
-}

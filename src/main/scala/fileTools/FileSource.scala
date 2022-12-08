@@ -1,28 +1,18 @@
+package fileTools
+
+import akka.NotUsed
 import akka.event.LoggingAdapter
-import akka.{ Done, NotUsed }
-import akka.stream.Supervision.{ Resume, Stop }
 import akka.stream.alpakka.file.DirectoryChange
 import akka.stream.alpakka.file.scaladsl.{ Directory, DirectoryChangesSource, FileTailSource }
-import akka.stream.scaladsl.Keep
-import akka.stream.scaladsl.Framing.FramingException
-import akka.stream.{
-  ActorAttributes,
-  ClosedShape,
-  FlowShape,
-  Graph,
-  Inlet,
-  Materializer,
-  SinkShape,
-  SourceShape,
-  UniformFanOutShape
-}
-import akka.stream.scaladsl.{ Balance, Broadcast, Flow, GraphDSL, Merge, MergeHub, RunnableGraph, Sink, Source }
+import akka.stream.scaladsl.{ GraphDSL, MergeHub, RunnableGraph, Sink, Source }
+import akka.stream.{ ClosedShape, Materializer, SourceShape }
 
 import java.io.{ File, FileNotFoundException }
 import java.nio.file.{ FileSystems, Path }
-import scala.concurrent.{ ExecutionContext, Future }
-import scala.concurrent.duration.*
+import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.FiniteDuration
 import scala.util.{ Failure, Success }
+import scala.concurrent.duration.*
 
 //-Dconfig.file =
 case class FileSource(
@@ -67,7 +57,7 @@ case class FileSource(
   def singleFileSource(stringPath: String): Source[String, NotUsed] = Source.fromGraph(
     GraphDSL.create() { implicit builder: GraphDSL.Builder[NotUsed] =>
 
-      import GraphDSL.Implicits._
+      import GraphDSL.Implicits.*
 
       val path = toPath(stringPath)
 
@@ -91,7 +81,7 @@ case class FileSource(
   def multipleFileSource[M](root: String, sink: Sink[String, M]): RunnableGraph[NotUsed] =
     RunnableGraph.fromGraph(
       GraphDSL.create() { implicit builder: GraphDSL.Builder[NotUsed] =>
-        import GraphDSL.Implicits._
+        import GraphDSL.Implicits.*
 
         val rootPath: Path = toPath(root)
 
@@ -112,7 +102,6 @@ case class FileSource(
           .merge(newFiles)
           .filter(p => new File(p.toString).isFile)
           .runForeach(p => singleFileSource(p.toString).runWith(port))
-
 
         ClosedShape
       }
